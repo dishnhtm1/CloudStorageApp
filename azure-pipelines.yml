@@ -7,22 +7,33 @@ pool:
     - agent.name -equals Meshaka77lapLinux
 
 variables:
-  pythonVersion: '3.x'
+  pythonVersion: '3.9'  # Use a stable Python version available on the agent
 
 steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: $(pythonVersion)
-    addToPath: true
-
+# Step 1: Verify Python installation and set up the environment
 - script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
+    sudo apt-get update
+    sudo apt-get install -y python3 python3-venv python3-pip
+    python3 --version
+  displayName: 'Ensure Python is Installed'
 
+# Step 2: Upgrade pip and install dependencies
+- script: |
+    python3 -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install Dependencies'
+
+# Step 3: Package the application for deployment
+- script: |
+    zip -r app.zip .  # Zip all files in the current directory
+  displayName: 'Package Application'
+
+# Step 4: Deploy to Azure Web App
 - task: AzureWebApp@1
   inputs:
     azureSubscription: 'newproapp'
     appName: 'newproapp'
-    package: $(System.DefaultWorkingDirectory)/**/*.zip
+    package: $(System.DefaultWorkingDirectory)/app.zip
+  displayName: 'Deploy to Azure Web App'
+
 
