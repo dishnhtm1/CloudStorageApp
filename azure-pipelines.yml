@@ -1,0 +1,28 @@
+trigger:
+- main
+
+pool:
+  name: Default
+  demands:
+    - agent.name -equals Meshaka77lapLinux
+
+variables:
+  pythonVersion: '3.x'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: $(pythonVersion)
+    addToPath: true
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '<your-azure-subscription>'
+    appName: '<your-app-service-name>'
+    package: $(System.DefaultWorkingDirectory)/**/*.zip
+
